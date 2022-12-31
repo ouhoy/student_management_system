@@ -12,6 +12,18 @@ def name_validation(prompt_string):
     return name
 
 
+def num_input_validation(prompt_string, ls):
+    num = input(prompt_string).strip()
+    if num.isnumeric():
+        if ls and int(num) in range(1, len(ls) + 1):
+            return int(num) - 1
+        elif not ls:
+            return int(num)
+
+    print("Please put a valid number")
+    return num_input_validation(prompt_string, ls)
+
+
 def select_again(prompt_string):
     selection = input(f"{prompt_string} If yes type Y otherwise hit enter to continue: ").strip().lower()
     if selection == "y":
@@ -52,3 +64,27 @@ def remove_student():
     else:
         print(f"The student {name} is not in the record ")
         return False
+
+
+while True:
+    options = ["Add student", "View Students", "Search Student", "Remove Student"]
+    for i in range(len(options)):
+        print(f"{i + 1}) {options[i]}")
+    choice = num_input_validation("Select a number from the list: ", ls=options)
+
+    if choice == 0:
+        new_student = add_student()
+        students.append(new_student)
+        print(f"You have added a new student: {new_student} to your record")
+        continue
+    if choice == 1:
+        view_students()
+        continue
+    if choice == 2:
+        search_student()
+        continue
+    if choice == 4:
+        removed_student = remove_student()
+        if removed_student:
+            print(f"You have removed the student: {removed_student} from your record")
+        continue
