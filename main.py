@@ -38,6 +38,7 @@ def add_student():
     name = name_validation("Enter student name")
     if name in students:
         print(f"The student's name: {name} you have entered already is in the record ")
+        return False
     return name
 
 
@@ -74,8 +75,9 @@ while True:
 
     if choice == 0:
         new_student = add_student()
-        students.append(new_student)
-        print(f"You have added a new student: {new_student} to your record")
+        if new_student:
+            students.append(new_student)
+            print(f"You have added a new student: {new_student} to your record")
         continue
     if choice == 1:
         view_students()
@@ -83,8 +85,11 @@ while True:
     if choice == 2:
         search_student()
         continue
-    if choice == 4:
+    if choice == 3:
+        print("Worked")
         removed_student = remove_student()
         if removed_student:
+            students.remove(removed_student)
             print(f"You have removed the student: {removed_student} from your record")
+
         continue
