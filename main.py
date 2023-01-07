@@ -34,7 +34,43 @@ def select_again(prompt_string):
 students = []
 
 
-def add_student():
+class StudentManagement:
+    students_record = []
+
+    def __init__(self, name):
+        self.name = name
+
+    def add_student(self):
+        if self.name in self.students_record:
+            print(f"The student's name: {self.name} you have entered already is in the record ")
+            return False
+        return self.name
+
+    def view_students(self):
+        print(f"Total students is: {len(self.students_record)}")
+        for index, student in enumerate(self.students_record):
+            print(f"{index + 1} - {self.students_record}")
+
+    def search_student(self, name):
+        if name in self.students_record:
+            print(f"The student {name} is in the record")
+            return True
+        else:
+            print(f"The student {name} is not in the record ")
+            # if select_again("Would you like to add the student to the record? "):
+            #     add_student()
+            return False
+
+    def remove_student(self, name):
+
+        if name in self.students_record:
+            return name
+        else:
+            print(f"The student {name} is not in the record ")
+            return False
+
+
+"""def add_student():
     name = name_validation("Enter student name")
     if name in students:
         print(f"The student's name: {name} you have entered already is in the record ")
@@ -90,6 +126,42 @@ while True:
         removed_student = remove_student()
         if removed_student:
             students.remove(removed_student)
+            print(f"You have removed the student: {removed_student} from your record")
+
+        continue
+"""
+
+
+
+
+while True:
+    options = ["Add student", "View Students", "Search Student", "Remove Student"]
+    for i in range(len(options)):
+        print(f"{i + 1}) {options[i]}")
+    choice = num_input_validation("Select a number from the list: ", ls=options)
+
+    if choice == 0:
+        st_name = name_validation("Enter students name")
+        student = StudentManagement(st_name)
+        new_student = student.add_student()
+        if new_student:
+            student.students_record.append(new_student)
+            print(f"You have added a new student: {new_student} to your record")
+        continue
+    if choice == 1:
+        student.view_students()
+        continue
+    if choice == 2:
+        st_name = name_validation("Enter students name")
+        student.search_student(st_name)
+        continue
+    if choice == 3:
+        print("Worked")
+        st_name = name_validation("Enter students name")
+
+        removed_student = student.remove_student(st_name)
+        if removed_student:
+            student.students_record.remove(removed_student)
             print(f"You have removed the student: {removed_student} from your record")
 
         continue
