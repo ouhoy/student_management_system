@@ -1,40 +1,74 @@
-from prettytable import PrettyTable
+import os
 
 students = []
 id_count = 0
 
-table = PrettyTable(["ID", "First Name", "Last Name"])
 options = ["Add student", "View Students", "Search Student", "Remove Student", "Exit"]
 
 
-def name_validation(prompt_string):
+# ------- SUPPORT FUNCTIONS -------
+class Bcolors:
+    HEADER = '\033[95m'
+    INFO = '\033[94m'
+    OK_CYAN = '\033[96m'
+    OK_GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    END = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+# Clear console
+def cls():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def name_validation(prompt_string: str) -> str:
     name = input(prompt_string).lower().strip()
-    if len(name) > 512:
-        print("name too long")
+
+    # Check if name is empty
+    if not name:
+        print(f"{Bcolors.WARNING}Please enter a valid name{Bcolors.END}")
         return name_validation(prompt_string)
-    if len(name) < 3:
-        print("name too short")
-        return name_validation(prompt_string)
+
+    # Check if name includes alphabetical characters only
     if not name.replace(" ", "").isalpha():
-        print("Make sure that your name does not contain any numbers or symbols.")
+        print(f"{Bcolors.WARNING}Make sure that your name does not contain any numbers or symbols.{Bcolors.END}")
         return name_validation(prompt_string)
+
+    # Check the length of the name
+    if len(name) > 64:
+        print(
+            f"{Bcolors.WARNING}The entered name is too long, please enter a valid name that doe not exceed 64 "
+            f"characters in count.{Bcolors.END}")
+        return name_validation(prompt_string)
+    if len(name) < 1:
+        print(
+            f"{Bcolors.WARNING}The entered name is too short, please enter a valid name that doe not go under 1 "
+            f"character in count.{Bcolors.END}")
+        return name_validation(prompt_string)
+
     return name
 
 
-def num_input_validation(prompt_string, ls):
+def num_input_validation(prompt_string: str, ls: range or list) -> int:
     num = input(prompt_string).strip()
+
+    # Check if the entered number is numeric and is in the list
     if num.isnumeric():
         if ls and int(num) in range(1, len(ls) + 1):
             return int(num) - 1
         elif not ls:
             return int(num)
 
-    print("Please put a valid number")
+    print(f"{Bcolors.WARNING}Please put a valid number{Bcolors.END}")
     return num_input_validation(prompt_string, ls)
 
 
-def select_again(prompt_string):
-    selection = input(f"{prompt_string} If yes type Y otherwise hit enter to continue: ").strip().lower()
+def select_again(prompt_string: str) -> bool:
+    selection = input(
+        f"{Bcolors.INFO}{prompt_string} If yes type Y otherwise hit enter to continue: {Bcolors.END}").strip().lower()
     if selection == "y":
         return True
     return False
@@ -49,59 +83,51 @@ def student_exists(first_name, last_name) -> bool or dict:
     return available_students
 
 
-def list_students(students_list):
-    table.clear_rows()
+def student_table(students_list: list):
+    spaces = " "
+    spaces_num = len(students_list[0]["first_name"])
+    dashes = "-"
+
     for student in students_list:
-        table.add_row([student["id"], student["first_name"], student["last_name"]])
-    print(table)
+        if len(student["first_name"]) > spaces_num:
+            spaces_num = len(student["first_name"])
+
+        if len(student["last_name"]) > spaces_num:
+            spaces_num = len(student["last_name"])
+        spaces_num += 5
+
+    print("ID", spaces * 5, "first name", spaces * (spaces_num - len("first name")), "last name")
+    for student in students_list:
+        print(dashes * (spaces_num * 3))
+        print(student["id"], spaces * 6, student["first_name"], spaces * (spaces_num - len(student["first_name"])),
+              student["last_name"])
 
 
-class StudentManagement:
-    students_record = []
+def get_student_name() -> dict:
+    while True:
+        cls()
+        first_name = name_validation("Enter student's first name: ").lower().strip()
+        last_name = name_validation("Enter student's last name: ").lower().strip()
 
-    def __init__(self, name):
-        self.name = name
-
-    def add_student(self):
-        if self.name in self.students_record:
-            print(f"The student's name: {self.name} you have entered already is in the record ")
-            return False
-        return self.name
-
-    def view_students(self):
-        print(f"Total students is: {len(self.students_record)}")
-        for index, student in enumerate(self.students_record):
-            print(f"{index + 1} - {self.students_record}")
-
-    def search_student(self, name):
-        if name in self.students_record:
-            print(f"The student {name} is in the record")
-            return True
-        else:
-            print(f"The student {name} is not in the record ")
-            # if select_again("Would you like to add the student to the record? "):
-            #     add_student()
-            return False
-
-    def remove_student(self, name):
-
-        if name in self.students_record:
-            return name
-        else:
-            print(f"The student {name} is not in the record ")
-            return False
+        if select_again("Do you want to edit your inputs?"):
+            continue
+        break
+    return {"first_name": first_name, "last_name": last_name}
 
 
-# todo edit options
+# ------- MAIN FUNCTIONS -------
+
 def add_student():
-    first_name = name_validation("Enter student's first name: ").lower().strip()
-    last_name = name_validation("Enter student's last name: ").lower().strip()
+    student_name = get_student_name()
+    first_name = student_name["first_name"]
+    last_name = student_name["last_name"]
     same_students = student_exists(first_name, last_name)
 
     if same_students:
+        cls()
         print(
             f"The student {first_name.capitalize()} {last_name.capitalize()} is already in the record")
-        list_students(same_students)
+        student_table(same_students)
         if select_again("Would you like to add this student anyway?"):
             return {"first_name": first_name, "last_name": last_name, "id": id_count}
 
@@ -112,23 +138,27 @@ def add_student():
 
 def view_students():
     if len(students) == 0:
-        return print("There is no student in the record")
+        return print(f"{Bcolors.WARNING}There is no student in the record{Bcolors.END}")
 
-    print(f"Total Students: {len(students)}")
-    list_students(students)
+    print(f"{Bcolors.INFO}Total Students: {len(students)} {Bcolors.END}")
+    student_table(students)
     print("\n")
 
 
 def search_student():
-    first_name = name_validation("Enter student's first name: ").lower().strip()
-    last_name = name_validation("Enter student's last name: ").lower().strip()
+    student_name = get_student_name()
+    first_name = student_name["first_name"]
+    last_name = student_name["last_name"]
     same_students = student_exists(first_name, last_name)
 
     # If there is one student with the entered name
     if len(same_students) == 1:
-        print(f"The student {first_name.capitalize()} {last_name.capitalize()} is in the record.")
+        print(
+            f"{Bcolors.INFO}"
+            f"The student {first_name.capitalize()} {last_name.capitalize()} is in the record."
+            f"{Bcolors.END}")
         print("Student information: ")
-        list_students(same_students)
+        student_table(same_students)
         return
 
     # If there is more than one student with the same name in the record
@@ -137,16 +167,16 @@ def search_student():
             f"There are {len(same_students)} students with the name of {first_name.capitalize()} "
             f"{last_name.capitalize()} in the record.")
         print("Students information: ")
-        list_students(same_students)
+        student_table(same_students)
         return
     else:
         print(f"The student {first_name.capitalize()} {last_name.capitalize()} is not in the record.")
 
 
-# todo make sure to ask the user before deletion
 def remove_student():
-    first_name = name_validation("Enter student's first name: ").lower().strip()
-    last_name = name_validation("Enter student's last name: ").lower().strip()
+    student_name = get_student_name()
+    first_name = student_name["first_name"]
+    last_name = student_name["last_name"]
     same_students = student_exists(first_name, last_name)
 
     # If there is one student with the entered name
@@ -160,7 +190,7 @@ def remove_student():
               f"{last_name.capitalize()} in the record.")
 
         # print students table
-        list_students(same_students)
+        student_table(same_students)
 
         # Delete Student By Id
         while True:
@@ -177,37 +207,52 @@ def remove_student():
 
 
 while True:
+
+    # Print Methods
     for i in range(len(options)):
         print(f"{i + 1}) {options[i]}")
     user_choice = num_input_validation("Select a number from the list: ", ls=options)
 
+    # Add Student
     if user_choice == 0:
         new_student = add_student()
         if new_student:
             students.append(new_student)
             id_count += 1
             print(
+                f"{Bcolors.OK_GREEN}"
                 f"The student {new_student['first_name'].capitalize()} {new_student['last_name'].capitalize()}"
-                f" has been added to the record.")
+                f" has been added to the record."
+                f" {Bcolors.END}")
         continue
+
+    # View Students
     if user_choice == 1:
         view_students()
         continue
+
+    # Search Student
     if user_choice == 2:
         search_student()
         continue
+
+    # Remove Student
     if user_choice == 3:
         removed_student = remove_student()
         if removed_student:
-            # todo danger
 
-            print("Kindly note that this action will be final and cannot be undone")
+            print(f"{Bcolors.FAIL}Kindly note that this action will be final and cannot be undone{Bcolors.END}")
             if select_again("Please confirm if you intend to proceed with the deletion of this student."):
                 students.remove(removed_student)
-                print(f"You have successfully removed the student with this information")
-                list_students([removed_student])
+                print(
+                    f"{Bcolors.OK_GREEN}"
+                    f"You have successfully removed the student with this information"
+                    f"{Bcolors.OK_GREEN}")
+                student_table([removed_student])
 
         continue
+
+    # Exit
     if user_choice == 4:
         print("Goodbye!")
         quit()
