@@ -25,8 +25,26 @@ def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def similar(a, b):
-    return SequenceMatcher(None, a, b).ratio()
+# Find and print names similar to the searched student name
+def similar(first_name: str, last_name: str):
+    cls()
+    print(
+        f"{Bcolors.WARNING}"
+        f"The student {first_name.capitalize()} {last_name.capitalize()} is not in the record."
+        f"{Bcolors.END}")
+
+    similar_search = []
+    for student in students:
+        if SequenceMatcher(None, student["first_name"] + student["last_name"], first_name + last_name).ratio() > 0.4:
+            similar_search.append(student)
+
+    if len(similar_search) == 0:
+        return
+
+    # Print results
+    print(f"\nSimilar Search: ")
+    student_table(similar_search)
+    similar_search.clear()
 
 
 def name_validation(prompt_string: str) -> str:
@@ -79,6 +97,7 @@ def select_again(prompt_string: str) -> bool:
     return False
 
 
+# Checks if there is one student or more with the same name
 def student_exists(first_name, last_name) -> bool or dict:
     available_students = []
     for student in students:
@@ -171,28 +190,15 @@ def search_student():
         return
 
     # If there is more than one student with the same name in the record
-    elif same_students:
+    if same_students:
         print(
             f"There are {len(same_students)} students with the name of {first_name.capitalize()} "
             f"{last_name.capitalize()} in the record.")
         print("Students information: ")
         student_table(same_students)
         return
-    else:
-        cls()
-        print(
-            f"{Bcolors.WARNING}"
-            f"The student {first_name.capitalize()} {last_name.capitalize()} is not in the record."
-            f"{Bcolors.END}")
-        print(f"\nSimilar Search: ")
-
-        similar_search = []
-        for student in students:
-            if similar(student["first_name"] + student["last_name"], first_name + last_name) > 0.4:
-                similar_search.append(student)
-
-        student_table(similar_search)
-        similar_search.clear()
+    # If no student was found
+    similar(first_name, last_name)
 
 
 def remove_student():
@@ -211,7 +217,7 @@ def remove_student():
         print(f"There are {len(same_students)} students with the name of {first_name.capitalize()} "
               f"{last_name.capitalize()} in the record.")
 
-        # print students table
+        # Show students table
         student_table(same_students)
 
         # Delete Student By Id
@@ -220,11 +226,10 @@ def remove_student():
             for student in same_students:
                 if student["id"] == student_id:
                     return student
-            # Todo warn
-            print("Please enter a valid ID from the above list.")
+            print(f"{Bcolors.WARNING}Please enter a valid ID from the above list.{Bcolors.END}")
 
-    # If there is no student with that name
-    print(f"The student {first_name.capitalize()} {last_name.capitalize()} is not in the record.")
+    # If no student name was found look for similar if available
+    similar(first_name, last_name)
     return False
 
 
