@@ -113,6 +113,7 @@ def student_table(students_list: list):
     spaces_num = len(students_list[0]["first_name"])
     dashes = "-"
 
+    # Find the longest name in the student list
     for student in students_list:
         if len(student["first_name"]) > spaces_num:
             spaces_num = len(student["first_name"])
@@ -121,6 +122,7 @@ def student_table(students_list: list):
             spaces_num = len(student["last_name"])
         spaces_num += 5
 
+    # Print the student table
     print("\n", "ID", spaces * 5, "first name", spaces * (spaces_num - len("first name")), "last name")
     for student in students_list:
         print(dashes * (spaces_num * 3))
@@ -143,17 +145,20 @@ def get_student_name() -> dict:
 
 # ------- MAIN FUNCTIONS -------
 
-def add_student():
+def add_student() -> dict or bool:
+    # Get student's first and last name
     student_name = get_student_name()
     first_name = student_name["first_name"]
     last_name = student_name["last_name"]
     same_students = student_exists(first_name, last_name)
 
+    # Check if the entered student is already in the record
     if same_students:
         cls()
         print(
             f"The student {first_name.capitalize()} {last_name.capitalize()} is already in the record")
         student_table(same_students)
+
         if select_again("Would you like to add this student anyway?"):
             return {"first_name": first_name, "last_name": last_name, "id": id_count}
 
@@ -201,14 +206,13 @@ def search_student():
     similar(first_name, last_name)
 
 
-def remove_student():
+def remove_student() -> dict or bool:
     student_name = get_student_name()
     first_name = student_name["first_name"]
     last_name = student_name["last_name"]
     same_students = student_exists(first_name, last_name)
 
-    # If there is one student with the entered name
-
+    # If there is one student in the record
     if len(same_students) == 1:
         return same_students[0]
 
@@ -228,14 +232,15 @@ def remove_student():
                     return student
             print(f"{Bcolors.WARNING}Please enter a valid ID from the above list.{Bcolors.END}")
 
-    # If no student name was found look for similar if available
+    # If no student name was found look and show similar names if available
     similar(first_name, last_name)
     return False
 
 
+# Initiate the software
 while True:
 
-    print("---------Student Management System Methods---------\n")
+    print("\n---------Student Management System Methods---------\n")
 
     # Print Methods
     for i in range(len(options)):
@@ -276,7 +281,7 @@ while True:
                 students.remove(removed_student)
                 print(
                     f"{Bcolors.OK_GREEN}"
-                    f"You have successfully removed the student with this information"
+                    f"You have successfully removed the student with the information below."
                     f"{Bcolors.END}")
                 student_table([removed_student])
 
