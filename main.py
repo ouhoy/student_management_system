@@ -8,6 +8,7 @@ options = ["Add student", "View Students", "Search Student", "Remove Student", "
 
 
 # ------- SUPPORT FUNCTIONS -------
+
 class Bcolors:
     HEADER = '\033[95m'
     INFO = '\033[94m'
@@ -98,7 +99,7 @@ def select_again(prompt_string: str) -> bool:
 
 
 # Checks if there is one student or more with the same name
-def student_exists(first_name, last_name) -> bool or dict:
+def student_exists(first_name: str, last_name: str) -> bool or dict:
     available_students = []
     for student in students:
         if student["first_name"] == first_name and last_name == student["last_name"]:
@@ -194,7 +195,7 @@ def search_student():
         student_table(same_students)
         return
 
-    # If there is more than one student with the same name in the record
+    # If there is more than one student with the same name in the list
     if same_students:
         print(
             f"There are {len(same_students)} students with the name of {first_name.capitalize()} "
@@ -202,7 +203,7 @@ def search_student():
         print("Students information: ")
         student_table(same_students)
         return
-    # If no student was found
+    # If no student name was found look and show similar names if available
     similar(first_name, last_name)
 
 
