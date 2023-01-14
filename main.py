@@ -22,13 +22,13 @@ class Bcolors:
 
 
 # Clear console
-def cls():
+def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
 # Find and print names similar to the searched student name
 def similar(first_name: str, last_name: str):
-    cls()
+    clear_console()
     print(
         f"{Bcolors.WARNING}"
         f"The student {first_name.capitalize()} {last_name.capitalize()} is not in the record."
@@ -39,7 +39,7 @@ def similar(first_name: str, last_name: str):
         if SequenceMatcher(None, student["first_name"] + student["last_name"], first_name + last_name).ratio() > 0.4:
             similar_search.append(student)
 
-    if len(similar_search) == 0:
+    if not similar_search:
         return
 
     # Print results
@@ -134,7 +134,7 @@ def student_table(students_list: list):
 
 def get_student_name() -> dict:
     while True:
-        cls()
+        clear_console()
         first_name = name_validation("Enter student's first name: ").lower().strip()
         last_name = name_validation("Enter student's last name: ").lower().strip()
 
@@ -155,7 +155,7 @@ def add_student() -> dict or bool:
 
     # Check if the entered student is already in the record
     if same_students:
-        cls()
+        clear_console()
         print(
             f"The student {first_name.capitalize()} {last_name.capitalize()} is already in the record")
         student_table(same_students)
@@ -169,17 +169,20 @@ def add_student() -> dict or bool:
 
 
 def view_students():
-    cls()
-    if len(students) == 0:
+    clear_console()
+
+    # No student in students list
+    if not students:
         return print(f"{Bcolors.WARNING}There is no student in the record{Bcolors.END}\n")
 
+    # Show Available Students
     print(f"\n{Bcolors.INFO}Total Students: {len(students)} {Bcolors.END}")
     student_table(students)
     print("\n")
 
 
 def search_student():
-    cls()
+    clear_console()
     student_name = get_student_name()
     first_name = student_name["first_name"]
     last_name = student_name["last_name"]
@@ -240,43 +243,36 @@ def remove_student() -> dict or bool:
 
 # Initiate the software
 while True:
-
     print("\n---------Student Management System Methods---------\n")
-
     # Print Methods
     for i in range(len(options)):
         print(f"{i + 1}) {options[i]}")
-    user_choice = num_input_validation("Select a number from the list: ", ls=options)
-
+    user_choice = num_input_validation("\nSelect a number from the list: ", ls=options)
     # Add Student
     if user_choice == 0:
         new_student = add_student()
         if new_student:
             students.append(new_student)
             id_count += 1
-            cls()
+            clear_console()
             print(
                 f"{Bcolors.OK_GREEN}"
                 f"The student {new_student['first_name'].capitalize()} {new_student['last_name'].capitalize()}"
                 f" has been added to the record."
                 f" {Bcolors.END}\n")
         continue
-
     # View Students
     if user_choice == 1:
         view_students()
         continue
-
     # Search Student
     if user_choice == 2:
         search_student()
         continue
-
     # Remove Student
     if user_choice == 3:
         removed_student = remove_student()
         if removed_student:
-
             print(f"{Bcolors.FAIL}Kindly note that this action will be final and cannot be undone{Bcolors.END}\n")
             if select_again("Please confirm if you intend to proceed with the deletion of this student."):
                 students.remove(removed_student)
@@ -285,9 +281,7 @@ while True:
                     f"You have successfully removed the student with the information below."
                     f"{Bcolors.END}")
                 student_table([removed_student])
-
         continue
-
     # Exit
     if user_choice == 4:
         print("Goodbye!")
